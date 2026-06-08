@@ -1,6 +1,7 @@
 import { runner as migrationRunner } from "node-pg-migrate";
 import { resolve } from "node:path";
 import database from "infra/database";
+import { MigrationsErrorServices } from "infra/errors.js";
 
 const defaultMigrationsOptions = {
   dryRun: true,
@@ -21,6 +22,11 @@ async function listPendingMigrations() {
       dbClient,
     });
     return pendingMigrations;
+  } catch (error) {
+    throw new MigrationsErrorServices({
+      message: "Erro ao listar migrações pentedes.",
+      cause: error,
+    });
   } finally {
     if (dbClient) {
       await dbClient?.end();
@@ -41,6 +47,11 @@ async function runPendingMigrations() {
     });
 
     return migratedMigrations;
+  } catch (error) {
+    throw new MigrationsErrorServices({
+      message: "Erro ao iniciar migrações pendentes.",
+      cause: error,
+    });
   } finally {
     if (dbClient) {
       await dbClient?.end();
