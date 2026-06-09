@@ -39,5 +39,44 @@ describe("POST to /api/v1/users", () => {
       expect(Date.parse(responseBody.created_at)).not.toBeNaN();
       expect(Date.parse(responseBody.update_at)).not.toBeNaN();
     });
+
+    test("With duplicate 'email'", async () => {
+      const response1 = await fetch("http://localhost:3000/api/v1/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: "emailDuplicado1",
+          email: "duplicado@gmail.com",
+          password: "senha123",
+        }),
+      });
+
+      expect(response1.status).toBe(201);
+
+      const response2 = await fetch("http://localhost:3000/api/v1/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: "emailDuplicado2",
+          email: "Duplicado@gmail.com",
+          password: "senha123",
+        }),
+      });
+
+      expect(response2.status).toBe(400);
+
+      const response2Body = await response2.json();
+
+      expect(response2Body).toEqual({
+        name: "ValidationError",
+        message: "O email informando já estpa sendo utilizando.",
+        action: "Ultilize outro email para realizar o cadastro do usuario.",
+        statusCode: 400,
+      });
+    });
   });
 });
