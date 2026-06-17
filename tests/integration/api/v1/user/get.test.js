@@ -89,6 +89,62 @@ describe("GET to /api/v1/user", () => {
         action: "Verifique se este usuário está logado e tente novamente.",
         statusCode: 401,
       });
+
+      // Set - Cookie assertions
+      const parsedSetCookie = setCookieParser(response, {
+        map: true,
+      });
+
+      expect(parsedSetCookie.session_id).toEqual({
+        name: "session_id",
+        value: "invalid",
+        maxAge: -1,
+        path: "/",
+        httpOnly: true,
+      });
+    });
+
+    test("With expired session", async () => {
+      jest.useFakeTimers({
+        now: new Date(Date.now() - session.EXPIRATION_IN_MILLISECONDS),
+      });
+
+      const createUser = await orchestrator.createUser({
+        username: "UserWithExpiredSession",
+      });
+
+      const sessionObject = await orchestrator.createSession(createUser.id);
+
+      jest.useRealTimers();
+
+      const response = await fetch("http://localhost:3000/api/v1/user", {
+        headers: {
+          Cookie: `session_id=${sessionObject.token}`,
+        },
+      });
+
+      expect(response.status).toBe(401);
+
+      const responseBody = await response.json();
+
+      expect(responseBody).toEqual({
+        name: "UnauthorizedError",
+        message: "Usuario não possui sessão ativa.",
+        action: "Verifique se este usuário está logado e tente novamente.",
+        statusCode: 401,
+      });
+
+      const parsedSetCookie = setCookieParser(response, {
+        map: true,
+      });
+
+      expect(parsedSetCookie.session_id).toEqual({
+        name: "session_id",
+        value: "invalid",
+        maxAge: -1,
+        path: "/",
+        httpOnly: true,
+      });
     });
 
     test("With session after 15 day", async () => {
@@ -152,37 +208,6 @@ describe("GET to /api/v1/user", () => {
         password: createUser.password,
         created_at: createUser.created_at.toISOString(),
         update_at: createUser.update_at.toISOString(),
-      });
-    });
-
-    test("With expired session", async () => {
-      jest.useFakeTimers({
-        now: new Date(Date.now() - session.EXPIRATION_IN_MILLISECONDS),
-      });
-
-      const createUser = await orchestrator.createUser({
-        username: "UserWithExpiredSession",
-      });
-
-      const sessionObject = await orchestrator.createSession(createUser.id);
-
-      jest.useRealTimers();
-
-      const response = await fetch("http://localhost:3000/api/v1/user", {
-        headers: {
-          Cookie: `session_id=${sessionObject.token}`,
-        },
-      });
-
-      expect(response.status).toBe(401);
-
-      const responseBody = await response.json();
-
-      expect(responseBody).toEqual({
-        name: "UnauthorizedError",
-        message: "Usuario não possui sessão ativa.",
-        action: "Verifique se este usuário está logado e tente novamente.",
-        statusCode: 401,
       });
     });
   });
