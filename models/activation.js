@@ -1,8 +1,42 @@
 import email from "infra/email";
 import database from "infra/database";
 import webServer from "infra/webserver";
+import { NotFoundError } from "infra/errors";
 
 const EXPIRATION_IN_MILLISECONDS = 60 * 15 * 1000; // 15 minutes
+
+async function findOneValidById(tokenId) {
+  const activationTokenObject = await runSelectQuery(tokenId);
+  return activationTokenObject;
+
+  async function runSelectQuery(tokenId) {
+    const results = await database.query({
+      text: `
+        SELECT
+          *
+        FROM
+          user_activation_tokens
+        WHERE
+          id = $1
+          AND expires_at > NOW()
+          AND used_at IS NULL
+        LIMIT
+          1
+      ;`,
+      values: [tokenId],
+    });
+
+    if (results.rowCount === 0) {
+      throw new NotFoundError({
+        message:
+          "O Token de ativação utilizado não foi encontrado no sistema ou expirou.",
+        action: "Faça um novo cadastro.",
+      });
+    }
+
+    return results.rows[0];
+  }
+}
 
 async function create(userId) {
   const expiresAt = new Date(Date.now() + EXPIRATION_IN_MILLISECONDS);
@@ -27,47 +61,30 @@ async function create(userId) {
   }
 }
 
-async function findOndeByUserId(userId) {
-  const newToken = await runInsertQuery(userId);
-  return newToken;
-
-  async function runInsertQuery(userId) {
-    const results = await database.query({
-      text: `
-        SELECT
-          *
-        FROM
-          user_activation_tokens
-        WHERE
-          user_id = $1
-        LIMIT
-          1
-      ;`,
-      values: [userId],
-    });
-
-    return results.rows[0];
-  }
-}
-
 async function sendEmailToUser(user, activationToken) {
   await email.send({
-    from: "Xedit <contato@Xedit.com.br>",
+    from: "Xedit <contato@xedit.com.br>",
     to: user.email,
     subject: "Ative seu cadastro no Xedit!",
-    text: `${user.username}, clique no link abaixo para ativar seu cadastro no Xedit
-    
+    text: `
+Olá, ${user.username}!
+
+Clique no link abaixo para ativar seu cadastro no Xedit:
+
 ${webServer.origin}/cadastro/ativar/${activationToken.id}
-    
+
+Se você não solicitou este cadastro, ignore este email.
+
 Atenciosamente,
-Equipe Xedit`,
+Equipe Xedit
+`.trim(),
   });
 }
 
 const activation = {
   sendEmailToUser,
   create,
-  findOndeByUserId,
+  findOneValidById,
 };
 
 export default activation;
