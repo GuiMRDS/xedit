@@ -223,12 +223,43 @@ async function hashPasswordInObject(userInputValue) {
   userInputValue.password = hashedPassword;
 }
 
+async function setFeature(userId, features) {
+  const updateUser = await runUpdateQuery(userId, features);
+  return updateUser;
+
+  async function runUpdateQuery(userId, features) {
+    const results = await database.query({
+      text: `
+        UPDATE
+          users
+        SET
+          features = $2,
+          update_at = timezone('utc', now())
+        WHERE
+          id = $1
+        RETURNING
+          *
+      ;`,
+      values: [userId, features],
+    });
+    if (results.rowCount === 0) {
+      throw new NotFoundError({
+        message: "Usuário não encontrado.",
+        action: "Verifique o identificador informado.",
+      });
+    }
+
+    return results.rows[0];
+  }
+}
+
 const user = {
   create,
   findOneById,
   findOneByUsername,
   findOneByEmail,
   update,
+  setFeature,
 };
 
 export default user;
