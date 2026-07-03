@@ -255,11 +255,11 @@ async function setFeature(userId, features) {
 
 const user = {
   create,
+  update,
+  setFeature,
   findOneById,
   findOneByUsername,
   findOneByEmail,
-  update,
-  setFeature,
 };
 
 export default user;
