@@ -64,12 +64,11 @@ async function runPendingMigrations() {
   await migrator.runPendingMigrations();
 }
 
-async function createUser(userObject) {
+async function createUser({ username, email, password } = {}) {
   return await user.create({
-    username:
-      userObject.username || faker.internet.username().replace(/[_.-]/g, ""),
-    email: userObject.email || faker.internet.email(),
-    password: userObject.password || "validpassword",
+    username: username || faker.internet.username().replace(/[_.-]/g, ""),
+    email: email || faker.internet.email(),
+    password: password || "validpassword",
   });
 }
 
