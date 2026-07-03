@@ -78,6 +78,8 @@ describe("DELETE to /api/v1/sessions", () => {
           Cookie: `session_id=${sessionObject.token}`,
         },
       });
+
+      console.log(response.status);
       expect(response.status).toBe(200);
 
       const responseBody = await response.json();
