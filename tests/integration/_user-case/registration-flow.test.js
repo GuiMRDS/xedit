@@ -1,6 +1,7 @@
 import orchestrator from "tests/orchestrator";
 import webServer from "infra/webserver";
 import activation from "models/activation";
+import user from "models/user";
 
 beforeAll(async () => {
   await orchestrator.waitForAllServices();
@@ -11,6 +12,9 @@ beforeAll(async () => {
 
 describe("Use case: Registration Flow (all successful)", () => {
   let createUserResponseBody;
+  let activationTokenId;
+  let createSessionsResponseBody;
+
   test("Create user account", async () => {
     const createUserResponse = await fetch(
       "http://localhost:3000/api/v1/users",
@@ -48,7 +52,7 @@ describe("Use case: Registration Flow (all successful)", () => {
     expect(lastEmail.subject).toBe("Ative seu cadastro no Xedit!");
     expect(lastEmail.text).toContain("RegistrationFlow");
 
-    const activationTokenId = orchestrator.extractUUID(lastEmail.text);
+    activationTokenId = orchestrator.extractUUID(lastEmail.text);
     expect(lastEmail.text).toContain(
       `${webServer.origin}/cadastro/ativar/${activationTokenId}`,
     );
@@ -59,9 +63,51 @@ describe("Use case: Registration Flow (all successful)", () => {
     expect(activationTokenObject.used_at).toBe(null);
   });
 
-  test("Activate account", async () => {});
+  test("Activate account", async () => {
+    const activationResponse = await fetch(
+      `http://localhost:3000/api/v1/activations/${activationTokenId}`,
+      {
+        method: "PATCH",
+      },
+    );
+    expect(activationResponse.status).toBe(200);
 
-  test("Login", async () => {});
+    const activationResponseBody = await activationResponse.json();
+    expect(Date.parse(activationResponseBody.used_at)).not.toBeNaN();
 
-  test("Get user information", async () => {});
+    const activatedUser = await user.findOneByUsername("RegistrationFlow");
+    expect(activatedUser.features).toEqual(["create:session", "read:session"]);
+  });
+
+  test("Login", async () => {
+    const createSessionsResponse = await fetch(
+      "http://localhost:3000/api/v1/sessions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: "registraion.flow@xedit.com",
+          password: "RegistrationFlowPassword",
+        }),
+      },
+    );
+    expect(createSessionsResponse.status).toBe(201);
+
+    createSessionsResponseBody = await createSessionsResponse.json();
+    expect(createSessionsResponseBody.user_id).toBe(createUserResponseBody.id);
+  });
+
+  test("Get user information", async () => {
+    const userResponse = await fetch("http://localhost:3000/api/v1/user", {
+      headers: {
+        cookie: `session_id=${createSessionsResponseBody.token}`,
+      },
+    });
+    expect(userResponse.status).toBe(200);
+
+    const userResponseBody = await userResponse.json();
+    expect(userResponseBody.id).toBe(createUserResponseBody.id);
+  });
 });
