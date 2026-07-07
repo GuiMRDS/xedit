@@ -78,8 +78,6 @@ describe("DELETE to /api/v1/sessions", () => {
           Cookie: `session_id=${sessionObject.token}`,
         },
       });
-
-      console.log(response.status);
       expect(response.status).toBe(200);
 
       const responseBody = await response.json();
@@ -91,8 +89,6 @@ describe("DELETE to /api/v1/sessions", () => {
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
       });
-
-      console.log(responseBody);
 
       expect(uuidVersion(responseBody.id)).toEqual(4);
       expect(Date.parse(responseBody.expires_at)).not.toBeNaN();

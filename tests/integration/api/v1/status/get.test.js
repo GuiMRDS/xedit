@@ -57,13 +57,13 @@ describe("GET to /api/v1/status", () => {
   });
 
   describe("Privileged user", () => {
-    test("With `read:version`", async () => {
+    test("With `read:status:version`", async () => {
       const createdUser = await orchestrator.createUser({});
       const activatedUser = await orchestrator.activateUser(createdUser);
 
       await orchestrator.addFeaturesToUser(activatedUser, [
         "read:status",
-        "read:version",
+        "read:status:version",
       ]);
 
       const sessionObject = await orchestrator.createSession(activatedUser.id);

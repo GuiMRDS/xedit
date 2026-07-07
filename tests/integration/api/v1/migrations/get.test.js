@@ -9,7 +9,7 @@ beforeAll(async () => {
 describe("GET to /api/v1/migrations", () => {
   describe("Anonymous user", () => {
     test("Retrieving pending migrations", async () => {
-      const response = await fetch("http://localhost:3000/api/v1/user");
+      const response = await fetch("http://localhost:3000/api/v1/migrations");
       expect(response.status).toBe(403);
 
       const responseBody = await response.json();
@@ -17,7 +17,7 @@ describe("GET to /api/v1/migrations", () => {
       expect(responseBody).toEqual({
         name: "ForbiddenError",
         message: "Você não possui permissão para executar esta ação.",
-        action: `Verifique se o seu usuário possui a feature "read:session"`,
+        action: `Verifique se o seu usuário possui a feature "read:migration"`,
         statusCode: 403,
       });
     });
