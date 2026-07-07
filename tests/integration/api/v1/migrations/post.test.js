@@ -48,6 +48,22 @@ describe("POST to /api/v1/migrations", () => {
   });
 
   describe("Privileged user", () => {
-    test("With `read:migration`", async () => {});
+    test("With `create:migration`", async () => {
+      const createdUser = await orchestrator.createUser({});
+      const activatedUser = await orchestrator.activateUser(createdUser);
+      await orchestrator.addFeaturesToUser(createdUser, ["create:migration"]);
+      const sessionObject = await orchestrator.createSession(activatedUser.id);
+
+      const response = await fetch("http://localhost:3000/api/v1/migrations", {
+        method: "POST",
+        headers: {
+          Cookie: `session_id=${sessionObject.token}`,
+        },
+      });
+      expect(response.status).toBe(200);
+
+      const responseBody = await response.json();
+      expect(Array.isArray(responseBody)).toBe(true);
+    });
   });
 });

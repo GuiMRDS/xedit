@@ -7,7 +7,7 @@ const router = createRouter();
 
 router.use(controller.injectAnonymousOrUser);
 router.get(controller.canRequest("read:migration"), getHandler);
-router.post(controller.canRequest("create:migrations"), postHandler);
+router.post(controller.canRequest("create:migration"), postHandler);
 
 export default router.handler(controller.errorHandlers);
 
@@ -17,7 +17,7 @@ async function getHandler(request, response) {
 
   const secureOutputValues = authorization.filterOutput(
     userTryingToGet,
-    "read:user:self",
+    "read:migration",
     pendingMigrations,
   );
 
@@ -25,11 +25,18 @@ async function getHandler(request, response) {
 }
 
 async function postHandler(request, response) {
+  const userTryingToPost = request.context.user;
   const migratedMigrations = await migrator.runPendingMigrations();
 
-  if (migratedMigrations.length > 0) {
-    return response.status(201).json(migratedMigrations);
+  const secureOutputValues = authorization.filterOutput(
+    userTryingToPost,
+    "read:migration",
+    migratedMigrations,
+  );
+
+  if (secureOutputValues.length > 0) {
+    return response.status(201).json(secureOutputValues);
   }
 
-  return response.status(200).json(migratedMigrations);
+  return response.status(200).json(secureOutputValues);
 }

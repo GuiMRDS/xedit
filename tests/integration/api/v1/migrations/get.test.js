@@ -50,21 +50,18 @@ describe("GET to /api/v1/migrations", () => {
   describe("Privileged user", () => {
     test("With `read:migration`", async () => {
       const createdUser = await orchestrator.createUser({});
-      await orchestrator.addFeaturesToUser(createdUser, ["read:migration"]);
-
       const activatedUser = await orchestrator.activateUser(createdUser);
-      const sessionObject = await orchestrator.createSession(activatedUser);
+      await orchestrator.addFeaturesToUser(createdUser, ["read:migration"]);
+      const sessionObject = await orchestrator.createSession(activatedUser.id);
 
       const response = await fetch("http://localhost:3000/api/v1/migrations", {
         headers: {
           Cookie: `session_id=${sessionObject.token}`,
         },
       });
-
       expect(response.status).toBe(200);
 
       const responseBody = await response.json();
-
       expect(Array.isArray(responseBody)).toBe(true);
     });
   });

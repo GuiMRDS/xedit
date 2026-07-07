@@ -92,6 +92,8 @@ describe("DELETE to /api/v1/sessions", () => {
         updated_at: responseBody.updated_at,
       });
 
+      console.log(responseBody);
+
       expect(uuidVersion(responseBody.id)).toEqual(4);
       expect(Date.parse(responseBody.expires_at)).not.toBeNaN();
       expect(Date.parse(responseBody.created_at)).not.toBeNaN();

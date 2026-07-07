@@ -47,8 +47,9 @@ function filterOutput(user, feature, insecureValues) {
         token: insecureValues.token,
         user_id: insecureValues.user_id,
         username: insecureValues.username,
+        expires_at: insecureValues.expires_at,
         created_at: insecureValues.created_at,
-        update_at: insecureValues.update_at,
+        updated_at: insecureValues.updated_at,
       };
     }
   }
@@ -72,6 +73,26 @@ function filterOutput(user, feature, insecureValues) {
         timestamp: migration.timestamp,
       };
     });
+  }
+
+  if (feature === "read:status") {
+    const output = {
+      updated_at: insecureValues.updated_at,
+      dependencies: {
+        database: {
+          max_connections: insecureValues.dependencies.database.max_connections,
+          open_connections:
+            insecureValues.dependencies.database.open_connections,
+        },
+      },
+    };
+
+    if (user.features.includes("read:version")) {
+      output.dependencies.database.version =
+        insecureValues.dependencies.database.version;
+    }
+
+    return output;
   }
 }
 
