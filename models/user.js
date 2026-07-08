@@ -99,6 +99,7 @@ async function create(userInputValue) {
   await validateUniqueEmail(userInputValue.email);
   await validateUniqueUsername(userInputValue.username);
   await hashPasswordInObject(userInputValue);
+  injectDefaultFeaturesInObject(userInputValue);
 
   const newUser = await runInsertQuery(userInputValue);
   return newUser;
@@ -107,9 +108,9 @@ async function create(userInputValue) {
     const result = await database.query({
       text: `
     INSERT INTO 
-      users (username, email, password) 
+      users (username, email, password, features) 
     VALUES 
-      ($1, $2, $3)
+      ($1, $2, $3, $4)
     RETURNING
       *
     ;`,
@@ -117,9 +118,14 @@ async function create(userInputValue) {
         userInputValue.username,
         userInputValue.email,
         userInputValue.password,
+        userInputValue.features,
       ],
     });
     return result.rows[0];
+  }
+
+  function injectDefaultFeaturesInObject(userInputValue) {
+    userInputValue.features = ["read:activation_token"];
   }
 }
 
@@ -217,12 +223,74 @@ async function hashPasswordInObject(userInputValue) {
   userInputValue.password = hashedPassword;
 }
 
+async function setFeature(userId, features) {
+  const updateUser = await runUpdateQuery(userId, features);
+  return updateUser;
+
+  async function runUpdateQuery(userId, features) {
+    const results = await database.query({
+      text: `
+        UPDATE
+          users
+        SET
+          features = $2,
+          update_at = timezone('utc', now())
+        WHERE
+          id = $1
+        RETURNING
+          *
+      ;`,
+      values: [userId, features],
+    });
+    if (results.rowCount === 0) {
+      throw new NotFoundError({
+        message: "Usuário não encontrado.",
+        action: "Verifique o identificador informado.",
+      });
+    }
+
+    return results.rows[0];
+  }
+}
+
+async function addFeatures(userId, features) {
+  const updateUser = await runUpdateQuery(userId, features);
+  return updateUser;
+
+  async function runUpdateQuery(userId, features) {
+    const results = await database.query({
+      text: `
+        UPDATE
+          users
+        SET
+          features = array_cat(features, $2),
+          update_at = timezone('utc', now())
+        WHERE
+          id = $1
+        RETURNING
+          *
+      ;`,
+      values: [userId, features],
+    });
+    if (results.rowCount === 0) {
+      throw new NotFoundError({
+        message: "Usuário não encontrado.",
+        action: "Verifique o identificador informado.",
+      });
+    }
+
+    return results.rows[0];
+  }
+}
+
 const user = {
   create,
+  update,
+  setFeature,
+  addFeatures,
   findOneById,
   findOneByUsername,
   findOneByEmail,
-  update,
 };
 
 export default user;
