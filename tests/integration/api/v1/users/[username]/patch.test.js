@@ -11,7 +11,7 @@ beforeAll(async () => {
 
 describe("PATCH to /api/v1/users/[username]", () => {
   describe("Anonymous user", () => {
-    test("With unique 'username'", async () => {
+    test("With unique `username`", async () => {
       const response = await fetch(
         "http://localhost:3000/api/v1/users/uniqueUser1",
         {
@@ -39,7 +39,7 @@ describe("PATCH to /api/v1/users/[username]", () => {
   });
 
   describe("Default user", () => {
-    test("With nonesistent 'username'", async () => {
+    test("With nonesistent `username`", async () => {
       const createdUser = await orchestrator.createUser();
       const activatedUser = await orchestrator.activateUser(createdUser);
       const sessionObject = await orchestrator.createSession(activatedUser.id);
@@ -64,7 +64,7 @@ describe("PATCH to /api/v1/users/[username]", () => {
       });
     });
 
-    test("With duplicated 'username'", async () => {
+    test("With duplicated `username`", async () => {
       await orchestrator.createUser({
         username: "user1",
       });
@@ -136,7 +136,7 @@ describe("PATCH to /api/v1/users/[username]", () => {
       });
     });
 
-    test("With duplicated 'email'", async () => {
+    test("With duplicated `email`", async () => {
       await orchestrator.createUser({
         email: "email1@xedit.com",
       });
@@ -174,7 +174,7 @@ describe("PATCH to /api/v1/users/[username]", () => {
       });
     });
 
-    test("With unique 'username'", async () => {
+    test("With unique `username`", async () => {
       const createdUser = await orchestrator.createUser({
         username: "uniqueUser1",
       });
@@ -212,7 +212,7 @@ describe("PATCH to /api/v1/users/[username]", () => {
       expect(responseBody.update_at > responseBody.created_at).toBe(true);
     });
 
-    test("With unique 'email'", async () => {
+    test("With unique `email`", async () => {
       const createdUser = await orchestrator.createUser({
         email: "uniqueEmail1@gmail.com",
       });
@@ -250,7 +250,7 @@ describe("PATCH to /api/v1/users/[username]", () => {
       expect(responseBody.update_at > responseBody.created_at).toBe(true);
     });
 
-    test("With new 'password'", async () => {
+    test("With new `password`", async () => {
       const createdUser = await orchestrator.createUser({
         password: "newPassword1",
       });
