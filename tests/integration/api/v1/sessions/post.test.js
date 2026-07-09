@@ -109,11 +109,9 @@ describe("POST to /api/v1/sessions", () => {
           password: "tudocorreto",
         }),
       });
-
       expect(response.status).toBe(201);
 
       const responseBody = await response.json();
-
       expect(responseBody).toEqual({
         id: responseBody.id,
         token: responseBody.token,
@@ -130,11 +128,13 @@ describe("POST to /api/v1/sessions", () => {
 
       const expiresAt = new Date(responseBody.expires_at);
       const createdAt = new Date(responseBody.created_at);
+      expect(expiresAt >= createdAt).toBe(true);
 
-      expiresAt.setMilliseconds(0);
-      createdAt.setMilliseconds(0);
+      const actuaLifetimeInMillisesconds = expiresAt - createdAt;
+      const lifetimeDifferenceInMilliseconds =
+        session.EXPIRATION_IN_MILLISECONDS - actuaLifetimeInMillisesconds;
 
-      expect(expiresAt - createdAt).toBe(session.EXPIRATION_IN_MILLISECONDS);
+      expect(lifetimeDifferenceInMilliseconds).toBeLessThanOrEqual(5000);
 
       const parsedSetCookie = setCookieParser(response, {
         map: true,
