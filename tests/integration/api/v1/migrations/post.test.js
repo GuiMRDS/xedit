@@ -10,7 +10,7 @@ beforeAll(async () => {
 
 describe("POST to /api/v1/migrations", () => {
   describe("Anonymous user", () => {
-    test("Retrieving pending migrations", async () => {
+    test("Running pending migrations", async () => {
       const response = await fetch(`${webserver.origin}/api/v1/migrations`);
       expect(response.status).toBe(403);
 
@@ -26,7 +26,7 @@ describe("POST to /api/v1/migrations", () => {
   });
 
   describe("Default user", () => {
-    test("Retrieving pending migrations", async () => {
+    test("Running pending migrations", async () => {
       const createUser = await orchestrator.createUser({});
       await orchestrator.activateUser(createUser);
       const sessionObject = await orchestrator.createSession(createUser.id);
