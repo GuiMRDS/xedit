@@ -10,7 +10,7 @@ export default function DefaultLayout({ children, metadata = {} }) {
         <title>{metadata.title ? `${metadata.title} · Xedit` : "Xedit"}</title>
 
         {metadata.description && (
-          <meta name="description" value={metadata.description} />
+          <meta name="description" content={metadata.description} />
         )}
       </Head>
 
