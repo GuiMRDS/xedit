@@ -1,8 +1,18 @@
+/* eslint-disable no-unused-vars */
+import DefaultLayout from "interface/DefaultLayout";
+
 function Home() {
   return (
-    <>
-      <h1>Hello World</h1>
-    </>
+    <DefaultLayout
+      metadata={{
+        description:
+          "Menos ruído, Mais Fundamentos: Um Lugar Inteligência Conletivas De Todos",
+      }}
+    >
+      <h1>
+        Menos ruído, Mais Fundamentos: Um Lugar Inteligência Conletivas De Todos
+      </h1>
+    </DefaultLayout>
   );
 }
 
