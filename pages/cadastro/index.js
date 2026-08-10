@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@primer/react";
 import DefaultLayout from "interface/DefaultLayout";
+import { Description } from "node_modules/@primer/react/dist/Blankslate/Blankslate";
 
 export default function RegisterPage() {
   console.log("Render do <RegisterPage>");
@@ -30,7 +31,12 @@ export default function RegisterPage() {
   }
 
   return (
-    <DefaultLayout>
+    <DefaultLayout
+      metadata={{
+        title: "Cadastro",
+        description: "Crie sua conta de forma gratuita.",
+      }}
+    >
       <h1>Cadastro</h1>
 
       <form onSubmit={handleSubmit}>
