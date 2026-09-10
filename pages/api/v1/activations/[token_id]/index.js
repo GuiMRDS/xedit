@@ -15,7 +15,15 @@ async function patchHandler(request, response) {
   const activationTokenId = request.query.token_id;
 
   const validActivationToken =
-    await activation.findOneValidById(activationTokenId);
+    await activation.findTokenById(activationTokenId);
+
+  if (validActivationToken.used_at) {
+    return response.status(200).json({
+      alreadyActivated: true,
+      message:
+        "Link de ativação já utilizado, tente fazer login com seu e-mail e senha.",
+    });
+  }
 
   await activation.activateUserByUserId(validActivationToken.user_id);
 
@@ -28,5 +36,8 @@ async function patchHandler(request, response) {
     usedActivationToken,
   );
 
-  return response.status(200).json(secureOutputValues);
+  return response.status(200).json({
+    alreadyActivated: false,
+    ...secureOutputValues,
+  });
 }
