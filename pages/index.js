@@ -5,8 +5,7 @@ function Home() {
   return (
     <DefaultLayout
       metadata={{
-        description:
-          "Menos ruído, Mais Fundamentos: Um Lugar Inteligência Conletivas De Todos",
+        description: "Um Lugar Especial, Para Pessoas Especiais",
       }}
     >
       <h1>
