@@ -24,8 +24,7 @@ describe("PATCH to /api/v1/activations/[token_id]", () => {
       const responseBody = await response.json();
       expect(responseBody).toEqual({
         name: "NotFoundError",
-        message:
-          "O Token de ativação utilizado não foi encontrado no sistema ou expirou.",
+        message: "O Token de ativação utilizado não foi encontrado no sistema.",
         action: "Faça um novo cadastro.",
         statusCode: 404,
       });
@@ -49,15 +48,13 @@ describe("PATCH to /api/v1/activations/[token_id]", () => {
           method: "PATCH",
         },
       );
-      expect(response2.status).toBe(404);
+      expect(response2.status).toBe(200);
 
       const response2Body = await response2.json();
       expect(response2Body).toEqual({
-        name: "NotFoundError",
         message:
-          "O Token de ativação utilizado não foi encontrado no sistema ou expirou.",
-        action: "Faça um novo cadastro.",
-        statusCode: 404,
+          "Link de ativação já utilizado, tente fazer login com seu e-mail e senha.",
+        alreadyActivated: true,
       });
     });
 
