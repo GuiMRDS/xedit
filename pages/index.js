@@ -8,9 +8,7 @@ function Home() {
         description: "Um Lugar Especial, Para Pessoas Especiais",
       }}
     >
-      <h1>
-        Menos ruído, Mais Fundamentos: Um Lugar Inteligência Conletivas De Todos
-      </h1>
+      <h1>Um Lugar Especial, Para Pessoas Especiais</h1>
     </DefaultLayout>
   );
 }
