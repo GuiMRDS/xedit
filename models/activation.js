@@ -40,6 +40,32 @@ async function findOneValidById(tokenId) {
   }
 }
 
+async function findTokenById(tokenId) {
+  const results = await database.query({
+    text: `
+      SELECT
+        *
+      FROM
+        user_activation_tokens
+      WHERE
+        id = $1
+      LIMIT
+        1
+      ;
+    `,
+    values: [tokenId],
+  });
+
+  if (results.rowCount === 0) {
+    throw new NotFoundError({
+      message: "O Token de ativação utilizado não foi encontrado no sistema.",
+      action: "Faça um novo cadastro.",
+    });
+  }
+
+  return results.rows[0];
+}
+
 async function create(userId) {
   const expiresAt = new Date(Date.now() + EXPIRATION_IN_MILLISECONDS);
 
@@ -129,6 +155,7 @@ const activation = {
   sendEmailToUser,
   create,
   findOneValidById,
+  findTokenById,
   markTokenAsUsed,
   activateUserByUserId,
 };

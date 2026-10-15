@@ -1,8 +1,15 @@
+/* eslint-disable no-unused-vars */
+import DefaultLayout from "interface/DefaultLayout";
+
 function Home() {
   return (
-    <>
-      <h1>Hello World</h1>
-    </>
+    <DefaultLayout
+      metadata={{
+        description: "Um Lugar Especial, Para Pessoas Especiais",
+      }}
+    >
+      <h1>Um Lugar Especial, Para Pessoas Especiais</h1>
+    </DefaultLayout>
   );
 }
 
